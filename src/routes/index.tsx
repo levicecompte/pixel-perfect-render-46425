@@ -81,10 +81,19 @@ function useOdometer(value: number) {
   return display;
 }
 
+const STATIC_GRID: Grid = [
+  ["cherry", "bell", "lemon"],
+  ["seven", "bar", "cherry"],
+  ["lemon", "diamond", "bell"],
+  ["bar", "wild", "seven"],
+  ["bell", "cherry", "scatter"],
+];
+
 function Game() {
   const [balance, setBalance] = useState(STARTING_BALANCE);
   const [betIndex, setBetIndex] = useState(2);
-  const [grid, setGrid] = useState<Grid>(() => randomGrid());
+  // Deterministic first render so SSR and client hydration match; randomised on mount.
+  const [grid, setGrid] = useState<Grid>(() => STATIC_GRID);
   const [spinId, setSpinId] = useState(0);
   const [spinningReels, setSpinningReels] = useState([false, false, false, false, false]);
   const [result, setResult] = useState<SpinResult | null>(null);
@@ -107,6 +116,10 @@ function Game() {
   const bet = BET_STEPS[betIndex] ?? 5;
   const displayBalance = useOdometer(balance);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    setGrid(randomGrid());
+  }, []);
 
   // --- persistence -------------------------------------------------------
   useEffect(() => {
